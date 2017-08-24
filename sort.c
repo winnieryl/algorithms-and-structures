@@ -114,9 +114,41 @@ void cocktail_sort(int *array, int n)
 }
 
 
-void merge_sort(int *array, int n)
+// merge two sorted arrays
+void merge(int *array, int left, int mid, int right)
 {
+	int len = right - left + 1;
+	int *temp = (int*)malloc(len*sizeof(int));
+	int index = 0;
+	int i = left;
+	int j = mid + 1;
+	while (i <= mid && j<=right)
+		temp[index++] = (array[i] <= array[j]) ? array[i++] : array[j++];
+	while (i <=mid)
+		temp[index++] = array[i++];
+	while (j <= right)
+		temp[index++] = array[j++];
+	int k;
+	for(k = 0; k < len; k++)
+		array[left++] = temp[k];
+	free(temp);
+}
 
+// 分类 -------------- 内部比较排序
+// 数据结构 ---------- 数组
+// 最差时间复杂度 ---- O(nlogn)
+// 最优时间复杂度 ---- O(nlogn)
+// 平均时间复杂度 ---- O(nlogn)
+// 所需辅助空间 ------ O(n)
+// 稳定性 ------------ 稳定
+void merge_sort_recursion(int *array, int left, int right)
+{
+	if (left == right)
+		return;
+	int mid = (left + right) / 2;
+	merge_sort_recursion(array, left, mid);
+	merge_sort_recursion(array, mid + 1, right);
+	merge(array, left, mid, right);
 }
 
 
@@ -281,51 +313,54 @@ void print_array(int *array, int n)
 int main()
 {
 	//int b[]={1,3,63,5,78,9,12,52,23};//测试样例；
-	int n = 20;
+	int n = 30;
 	int *b = generate_random_array(n, 100);
 	int* a = malloc(n*sizeof(int));
+	print_array(b, n);
 
 	// bubble
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	bubble_sort(a, n);
 	printf("bubble sort result: \n");
 	print_array(a, n);
 
 	// cocktail
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	cocktail_sort(a, n);
 	printf("cocktail sort result: \n");
 	print_array(a, n);
 
 	//selection
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	selection_sort(a, n);
 	printf("selection sort result: \n");
 	print_array(a, n);
 
 	//insertion
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	insertion_sort(a, n);
 	printf("insertion sort result: \n");
 	print_array(a, n);
 
-	//insertion binary search
+	//insertion binary sort
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	insertion_binary_search_sort(a, n);
 	printf("insertion binary search sort result: \n");
 	print_array(a, n);
 
-	//shell search
+	//shell sort
 	memcpy(a, b, n*sizeof(int));
-	print_array(a, n);
 	shell_sort(a, n);
 	printf("shell sort result: \n");
 	print_array(a, n);
+
+	//merge sort
+	memcpy(a, b, n*sizeof(int));
+	merge_sort_recursion(a, 0, n-1);
+	printf("merge sort result: \n");
+	print_array(a, n);
+
+
 
 	free(a);
 	free(b);

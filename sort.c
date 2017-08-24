@@ -11,6 +11,10 @@ typedef void (*sort_func_div)(int*, int, int);
 
 #define get_name(var) #var
 
+#define MAX 100
+
+int c[MAX];
+
 
 int my_random(int bound)
 {
@@ -18,6 +22,8 @@ int my_random(int bound)
 }
 
 
+
+// generate random array with given size and range
 int* generate_random_array(int size, int max)
 {
 	if (size < 1)
@@ -42,6 +48,8 @@ void swap(int *x, int *y)
 	*y = temp;
 }
 
+
+// reverse an array
 void reverse(int *array, int n)
 {
 	if (n < 1)
@@ -282,7 +290,7 @@ void shell_sort(int *array, int n)
 			while(j >= 0 && array[j] > cur)
 			{
 				array[j+h] = array[j];
-				j-=h;
+				j -= h;
 			}
 			array[j+h] = cur;
 		}
@@ -320,11 +328,61 @@ void selection_sort(int *array, int n)
 	}
 }
 
-void heap_sort(int *array, int n)
+void heapify(int *array, int i, int size)
 {
+	int left_child = 2 * i + 1;
+	int right_child = 2 * i + 2;
+	int max = i;
+	if (left_child < size && array[left_child] > array[max])
+		max = left_child;
+	if (right_child < size && array[right_child] > array[max])
+		max = right_child;
 
+	if (max != i )
+	{
+		swap(&array[i], &array[max]);
+		heapify(array, max, size);
+	}
 }
 
+
+//build heap
+int build_heap(int *array, int n)
+{
+	int heap_size = n;
+	int i;
+	for (i = heap_size/2 - 1; i >= 0; i--)
+		heapify(array, i, heap_size);
+	return heap_size;
+}
+
+// 分类 -------------- 内部比较排序
+// 数据结构 ---------- 数组
+// 最差时间复杂度 ---- O(nlogn)
+// 最优时间复杂度 ---- O(nlogn)
+// 平均时间复杂度 ---- O(nlogn)
+// 所需辅助空间 ------ O(1)
+// 稳定性 ------------ 不稳定
+void heap_sort(int *array, int n)
+{
+	printf("heap_sort\n");
+	if (n < 1)
+	{
+		printf("array size error\n");
+		return;
+	}
+	int heap_size = build_heap(array, n);
+
+	while(heap_size > 1)
+	{
+		swap(&array[0], &array[--heap_size]);
+		heapify(array, 0, heap_size);
+	}
+}
+
+
+
+// util function for quick sort
 int partition(int *array, int left, int right)
 {
 	int pivot = array[right];
@@ -357,9 +415,68 @@ void quick_sort(int *array, int left, int right)
 }
 
 
+// 分类 ------------ 内部非比较排序
+// 数据结构 --------- 数组
+// 最差时间复杂度 ---- O(n + k)
+// 最优时间复杂度 ---- O(n + k)
+// 平均时间复杂度 ---- O(n + k)
+// 所需辅助空间 ------ O(n + k)
+// 稳定性 ----------- 稳定
+void counting_sort(int *array, int n)
+{
+	printf("counting_sort\n");
+	if (n < 1)
+	{
+		printf("array size error\n");
+		return;
+	}
+
+	int i;
+	for(i = 0; i < MAX; i++)
+	{
+		c[i] = 0;
+	}
+
+	for(i = 0; i < n; i++)
+	{
+		c[array[i]] ++;
+	}
+
+	for(i = 1; i < MAX; i++)
+	{
+		c[i] = c[i] + c[i-1];
+	}
+
+	int *temp = (int*) malloc(n*sizeof(int));
+
+	for (i = n - 1; i >= 0; i--)
+	{
+		temp[--c[array[i]]] = array[i];
+	}
+
+
+	for(i = 0; i < n; i++)
+	{
+		array[i] = temp[i];
+	}
+
+	free(temp);
+
+}
 
 
 
+void lsd_radix_sort(int *array, int n)
+{
+
+}
+
+void bucket_sort(int *array, int n)
+{
+	
+}
+
+// print array
 void print_array(int *array, int n)
 {
 	int i;
@@ -372,9 +489,9 @@ void print_array(int *array, int n)
 
 int main()
 {
-	//int b[]={1,3,63,5,78,9,12,52,23};//测试样例；
+	// generate a random int array.
 	int n = 30;
-	int *b = generate_random_array(n, 100);
+	int *b = generate_random_array(n, MAX);
 	int* a = malloc(n*sizeof(int));
 	print_array(b, n);
 
@@ -385,7 +502,9 @@ int main()
 						insertion_sort, 
 						insertion_binary_search_sort, 
 						shell_sort, 
-						merge_sort_iteration};
+						merge_sort_iteration, 
+						heap_sort,
+						counting_sort};
 
 	int size = sizeof(funcs) / sizeof(sort_func);
 

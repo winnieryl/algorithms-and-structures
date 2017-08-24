@@ -4,6 +4,14 @@
 #define TRUE 1
 #define FALSE 0
 
+
+typedef void (*sort_func)(int*, int);
+
+typedef void (*sort_func_div)(int*, int, int);
+
+#define get_name(var) #var
+
+
 int my_random(int bound)
 {
 	return rand()%bound;
@@ -55,6 +63,7 @@ void reverse(int *array, int n)
 // 稳定性 ------------ 稳定
 void bubble_sort(int *array, int n)
 {
+	printf("bubble_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -87,6 +96,7 @@ void bubble_sort(int *array, int n)
 // 稳定性 ------------ 稳定
 void cocktail_sort(int *array, int n)
 {
+	printf("cocktail_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -124,7 +134,7 @@ void merge(int *array, int left, int mid, int right)
 	int j = mid + 1;
 	while (i <= mid && j<=right)
 		temp[index++] = (array[i] <= array[j]) ? array[i++] : array[j++];
-	while (i <=mid)
+	while (i <= mid)
 		temp[index++] = array[i++];
 	while (j <= right)
 		temp[index++] = array[j++];
@@ -152,6 +162,26 @@ void merge_sort_recursion(int *array, int left, int right)
 }
 
 
+
+//iteration version
+void merge_sort_iteration(int *array, int len)
+{
+	printf("merge_sort_iteration\n");
+	int left, mid, right, i;
+	for (i = 1; i < len; i *= 2)
+	{
+		left = 0;
+		while (left + i < len)
+		{
+			mid = left + i - 1;
+			right = (mid + i) < len ? mid + i : len - 1;
+			merge(array, left, mid, right);
+			left = right + 1;
+		}
+	}
+}
+
+
 // 分类 ------------- 内部比较排序
 // 数据结构 ---------- 数组
 // 最差时间复杂度 ---- 最坏情况为输入序列是降序排列的,此时时间复杂度O(n^2)
@@ -161,6 +191,7 @@ void merge_sort_recursion(int *array, int left, int right)
 // 稳定性 ------------ 稳定
 void insertion_sort(int *array, int n)
 {
+	printf("insertion_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -190,6 +221,7 @@ void insertion_sort(int *array, int n)
 // 稳定性 ------------ 稳定
 void insertion_binary_search_sort(int *array, int n)
 {
+	printf("insertion_binary_search_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -228,6 +260,7 @@ void insertion_binary_search_sort(int *array, int n)
 // 稳定性 ------------ 不稳定
 void shell_sort(int *array, int n)
 {
+	printf("shell_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -267,6 +300,7 @@ void shell_sort(int *array, int n)
 // 稳定性 ------------ 不稳定
 void selection_sort(int *array, int n)
 {
+	printf("selection_sort\n");
 	if (n < 1)
 	{
 		printf("array size error\n");
@@ -291,9 +325,35 @@ void heap_sort(int *array, int n)
 
 }
 
-void quick_sort(int *array, int n)
+int partition(int *array, int left, int right)
 {
+	int pivot = array[right];
+	int tail = left - 1;
+	int i;
+	for (i = left; i < right; i++)
+	{
+		if (array[i] <= pivot)
+			swap(&array[i], &array[++tail]);
+	}
+	swap(&array[right], &array[tail + 1]);
 
+	return tail + 1;
+}
+
+// 分类 ------------ 内部比较排序
+// 数据结构 --------- 数组
+// 最差时间复杂度 ---- 每次选取的基准都是最大（或最小）的元素，导致每次只划分出了一个分区，需要进行n-1次划分才能结束递归，时间复杂度为O(n^2)
+// 最优时间复杂度 ---- 每次选取的基准都是中位数，这样每次都均匀的划分出两个分区，只需要logn次划分就能结束递归，时间复杂度为O(nlogn)
+// 平均时间复杂度 ---- O(nlogn)
+// 所需辅助空间 ------ 主要是递归造成的栈空间的使用(用来保存left和right等局部变量)，取决于递归树的深度，一般为O(logn)，最差为O(n)       
+// 稳定性 ---------- 不稳定
+void quick_sort(int *array, int left, int right)
+{
+	if (left >= right)
+		return;
+	int pivot = partition(array, left, right);
+	quick_sort(array, left, pivot - 1);
+	quick_sort(array, pivot + 1, right);
 }
 
 
@@ -318,48 +378,38 @@ int main()
 	int* a = malloc(n*sizeof(int));
 	print_array(b, n);
 
-	// bubble
-	memcpy(a, b, n*sizeof(int));
-	bubble_sort(a, n);
-	printf("bubble sort result: \n");
-	print_array(a, n);
+	// sort func ptrs:
+	sort_func funcs[] = {bubble_sort, 
+						cocktail_sort, 
+						selection_sort, 
+						insertion_sort, 
+						insertion_binary_search_sort, 
+						shell_sort, 
+						merge_sort_iteration};
 
-	// cocktail
-	memcpy(a, b, n*sizeof(int));
-	cocktail_sort(a, n);
-	printf("cocktail sort result: \n");
-	print_array(a, n);
+	int size = sizeof(funcs) / sizeof(sort_func);
 
-	//selection
-	memcpy(a, b, n*sizeof(int));
-	selection_sort(a, n);
-	printf("selection sort result: \n");
-	print_array(a, n);
+	sort_func_div funcs_div[] = {merge_sort_recursion,
+								quick_sort};
+	char* func_div_names[] = {"merge_sort_recursion",
+							"quick_sort"};
+	int size_div = sizeof(funcs_div) / sizeof(sort_func_div);
 
-	//insertion
-	memcpy(a, b, n*sizeof(int));
-	insertion_sort(a, n);
-	printf("insertion sort result: \n");
-	print_array(a, n);
+	int i;
+	for(i = 0; i < size; i++)
+	{
+		memcpy(a, b, n*sizeof(int));
+		funcs[i](a, n);
+		print_array(a, n);
+	}
 
-	//insertion binary sort
-	memcpy(a, b, n*sizeof(int));
-	insertion_binary_search_sort(a, n);
-	printf("insertion binary search sort result: \n");
-	print_array(a, n);
-
-	//shell sort
-	memcpy(a, b, n*sizeof(int));
-	shell_sort(a, n);
-	printf("shell sort result: \n");
-	print_array(a, n);
-
-	//merge sort
-	memcpy(a, b, n*sizeof(int));
-	merge_sort_recursion(a, 0, n-1);
-	printf("merge sort result: \n");
-	print_array(a, n);
-
+	for(i = 0; i < size_div; i++)
+	{
+		memcpy(a, b, n*sizeof(int));
+		funcs_div[i](a, 0, n - 1);
+		printf("%s\n", func_div_names[i]);
+		print_array(a, n);
+	}
 
 
 	free(a);

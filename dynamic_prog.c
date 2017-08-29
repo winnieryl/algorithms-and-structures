@@ -28,9 +28,28 @@ int dynamic_coin_changing(int *coins, int coin_num, int amount)
     return result;
 }
 
+
+
+int dynamic_coin_changing_simple(int *coins, int coin_num, int amount)
+{
+    int *dp = (int *)calloc(amount+1, sizeof(int));
+    int i, j, result;
+    for(i=1;i<amount+1;i++)
+        dp[i] = INT_MAX;
+    for(i=1;i<coin_num+1;i++)
+    {
+        for(j=coins[i-1];j<amount+1;j++)
+            dp[j]=min(dp[j-coins[i-1]]+1, dp[j]);
+    }
+    result = dp[amount];
+    free(dp);
+    return result;
+}
+
 int main()
 {
     int coins[] = {1, 3, 4};
     printf("min coin number is: %d\n", dynamic_coin_changing(coins, sizeof(coins)/sizeof(int), 18));
+    printf("using simple algorithm: min coin number is: %d\n", dynamic_coin_changing_simple(coins, sizeof(coins)/sizeof(int), 18));
     return 0;    
 }

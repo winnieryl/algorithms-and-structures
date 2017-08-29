@@ -5,8 +5,8 @@
 * @Last Modified time: 2017-04-26 18:06:46
 */
 
-#include "include/mylib.h"
-#include "include/mystruct.h"
+#include "mylib.h"
+#include "mystruct.h"
 #include <stdlib.h>
 
 /**

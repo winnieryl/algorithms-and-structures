@@ -6,8 +6,8 @@
 */
 
 #include <stdlib.h>
-#include "include/mylib.h"
-#include "include/mystruct.h"
+#include "mylib.h"
+#include "mystruct.h"
 
 #ifdef MY_STRUCT
 int main() {
